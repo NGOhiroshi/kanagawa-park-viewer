@@ -1,0 +1,17 @@
+{
+  "name": "kanagawa-park-viewer",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "parse": "tsx scripts/parse-csv.ts",
+    "geocode": "tsx scripts/geocode.ts",
+    "build-data": "pnpm parse && pnpm geocode && tsx scripts/finalize.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "csv-parse": "^6.2.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

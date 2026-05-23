@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.env.local
+.vite/
+coverage/
+.cache/
+.claude/settings.local.json
+
+# Large regeneratable intermediate from parse-csv.ts (rebuild via `pnpm parse`)
+data/processed/parks.base.json
+
+# Private notes (competitive analysis, internal memos — not for public repo)
+docs/private/
