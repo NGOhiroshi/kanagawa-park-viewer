@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { FACILITIES } from "../../../domain/park/Park";
 import type { FacilityCategory } from "../../../domain/park/Park";
 import { useAppStore } from "../../../application/store";
@@ -27,47 +28,83 @@ const grouped = CATEGORY_ORDER.map((cat) => ({
 }));
 
 /**
- * 設備フィルタパネル（ボトムシート内）。
+ * 設備フィルタ + 公園名検索パネル（ボトムシート内）。
  *
  * アクセシビリティポイント:
  * - aria-live="polite" で絞り込み件数をスクリーンリーダーに通知
+ * - テキスト入力は role="search" + label で検索フィールドと明示
  * - カテゴリごとに <section> + <h3> でアウトライン構造化
  */
 export function SearchPanel() {
-  const { filteredParks, condition, clearCondition } = useAppStore();
+  const { filteredParks, condition, nameQuery, clearCondition, setNameQuery } = useAppStore();
   const selectedCount = condition.facilities.size;
+  const nameInputId = useId();
+  const hasAnyFilter = selectedCount > 0 || nameQuery.trim() !== "";
 
   return (
     <section aria-label="公園フィルタ" className={styles.panel}>
-      {/* ヘッダー: タイトル + AND/OR トグル + 件数 */}
+      <h2 id="search-panel-title" className={styles.title}>
+        公園を探す
+      </h2>
+
+      {/* 公園名検索 */}
+      <div role="search" className={styles.nameSearch}>
+        <label htmlFor={nameInputId} className={styles.nameLabel}>
+          公園名・住所で検索
+        </label>
+        <div className={styles.nameInputWrapper}>
+          <span className={styles.searchIcon} aria-hidden="true">🔍</span>
+          <input
+            id={nameInputId}
+            type="search"
+            inputMode="search"
+            placeholder="例: 境川、横浜市緑区..."
+            value={nameQuery}
+            onChange={(e) => setNameQuery(e.target.value)}
+            className={styles.nameInput}
+            autoComplete="off"
+          />
+          {nameQuery && (
+            <button
+              type="button"
+              onClick={() => setNameQuery("")}
+              className={styles.clearInput}
+              aria-label="公園名の検索をクリア"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 設備フィルタヘッダー */}
       <div className={styles.header}>
-        <h2 id="search-panel-title" className={styles.title}>
-          設備で絞り込む
-        </h2>
+        <h3 className={styles.subTitle}>設備で絞り込む</h3>
         <AndOrToggle />
       </div>
 
-      {/* 件数フィードバック: aria-live で動的更新をスクリーンリーダーに通知 */}
+      {/* 件数フィードバック */}
       <p
         role="status"
         aria-live="polite"
         aria-atomic="true"
         className={styles.resultCount}
       >
-        {selectedCount === 0
-          ? `全 ${filteredParks.length} 件の公園`
-          : `条件に合う公園: ${filteredParks.length} 件`}
+        {hasAnyFilter
+          ? `条件に合う公園: ${filteredParks.length} 件`
+          : `全 ${filteredParks.length} 件の公園`}
       </p>
 
       {/* クリアボタン */}
-      {selectedCount > 0 && (
+      {hasAnyFilter && (
         <button
           type="button"
-          onClick={clearCondition}
+          onClick={() => { clearCondition(); setNameQuery(""); }}
           className={styles.clearBtn}
-          aria-label={`${selectedCount}件の選択を解除`}
+          aria-label="すべての絞り込み条件をリセット"
         >
-          条件をクリア ({selectedCount})
+          すべてクリア
+          {selectedCount > 0 && ` (設備 ${selectedCount}件)`}
         </button>
       )}
 
@@ -75,7 +112,7 @@ export function SearchPanel() {
       <div className={styles.categories}>
         {grouped.map(({ category, label, facilities }) => (
           <section key={category} aria-label={label}>
-            <h3 className={styles.categoryLabel}>{label}</h3>
+            <h4 className={styles.categoryLabel}>{label}</h4>
             <div className={styles.chips} role="list">
               {facilities.map((f) => (
                 <div key={f.key} role="listitem">

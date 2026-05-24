@@ -30,15 +30,17 @@
   white-space: nowrap;
 }
 
-/* フローティング検索バー: マップ上部に浮かせる */
-.searchBar {
+/* フローティング上部バー: オーバーレイ(99)より上、かつ常にアクセス可能 */
+.topBar {
   position: fixed;
   top: var(--space-4);
   left: 50%;
   transform: translateX(-50%);
-  z-index: var(--z-map-control);
-  /* iOS ノッチ対応 */
+  z-index: calc(var(--z-bottom-sheet) + 10); /* 110 — overlay(99)より上 */
   padding-top: env(safe-area-inset-top);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .searchButton {
@@ -46,7 +48,7 @@
   align-items: center;
   gap: var(--space-2);
   min-height: var(--min-tap-size);
-  padding: 0 var(--space-4);
+  padding: 0 var(--space-3);
   border-radius: var(--radius-full);
   background: var(--color-surface-overlay);
   box-shadow: var(--shadow-md);
@@ -54,23 +56,48 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
   white-space: nowrap;
-  /* バックドロップブラー: ガラス風 */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+.searchLabel {
+  font-size: var(--font-size-sm);
 }
 
 .countBadge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
+  min-width: 28px;
   height: 24px;
   padding: 0 var(--space-1);
   border-radius: var(--radius-full);
-  background: var(--color-primary-500);
-  color: var(--color-text-on-primary);
+  background: var(--color-primary-100);
+  color: var(--color-primary-700);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+/* フィルタが有効なときはグリーンを強調 */
+.countBadgeActive {
+  background: var(--color-primary-500);
+  color: var(--color-text-on-primary);
+}
+
+/* About ボタン */
+.aboutBtn {
+  width: var(--min-tap-size);
+  height: var(--min-tap-size);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-overlay);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
 }
 
 /* ボトムシートの背景クリック用オーバーレイ */

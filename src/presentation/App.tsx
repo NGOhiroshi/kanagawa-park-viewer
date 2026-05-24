@@ -4,10 +4,24 @@ import { ParkMap } from "./components/map/ParkMap";
 import { SearchPanel } from "./components/search/SearchPanel";
 import { ParkCard } from "./components/park/ParkCard";
 import { BottomSheet } from "./components/common/BottomSheet";
+import { AboutPage } from "./components/about/AboutPage";
 import styles from "./App.module.css";
 
 export function App() {
-  const { loadParks, filteredParks, isLoading, loadError, isSearchPanelOpen, openSearchPanel, closeSearchPanel, selectPark } = useAppStore();
+  const {
+    loadParks,
+    filteredParks,
+    isLoading,
+    loadError,
+    isSearchPanelOpen,
+    openSearchPanel,
+    closeSearchPanel,
+    selectPark,
+    currentView,
+    setView,
+    condition,
+    nameQuery,
+  } = useAppStore();
   const selectedPark = useSelectedPark();
 
   // 初回マウント時にデータ読み込み
@@ -18,6 +32,11 @@ export function App() {
   const showSearchPanel = isSearchPanelOpen && !selectedPark;
   const showParkCard = selectedPark !== null;
   const bottomSheetOpen = showSearchPanel || showParkCard;
+  const activeFilterCount = condition.facilities.size + (nameQuery.trim() ? 1 : 0);
+
+  if (currentView === "about") {
+    return <AboutPage />;
+  }
 
   return (
     <>
@@ -37,23 +56,34 @@ export function App() {
       </main>
 
       {/* フローティング検索バー */}
-      <div className={styles.searchBar} role="search">
+      <div className={styles.topBar}>
         <button
           type="button"
           className={styles.searchButton}
           onClick={openSearchPanel}
           aria-expanded={isSearchPanelOpen}
           aria-controls="search-panel"
-          aria-label="設備フィルタを開く"
+          aria-label="公園を検索・絞り込む"
         >
-          🔍 設備で絞り込む
-          {/* 件数バッジ */}
+          🔍
+          <span className={styles.searchLabel}>公園を探す</span>
+          {/* アクティブなフィルタ件数バッジ */}
           <span
-            className={styles.countBadge}
+            className={`${styles.countBadge} ${activeFilterCount > 0 ? styles.countBadgeActive : ""}`}
             aria-label={`${filteredParks.length}件の公園`}
           >
             {filteredParks.length}
           </span>
+        </button>
+
+        {/* About ページリンク */}
+        <button
+          type="button"
+          className={styles.aboutBtn}
+          onClick={() => setView("about")}
+          aria-label="このアプリについて"
+        >
+          ℹ️
         </button>
       </div>
 

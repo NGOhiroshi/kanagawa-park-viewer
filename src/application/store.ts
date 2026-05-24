@@ -21,6 +21,7 @@ interface AppState {
 
   // --- 検索条件 ---
   condition: SearchCondition;
+  nameQuery: string;
 
   // --- 位置情報 ---
   userLocation: Coordinates | null;
@@ -28,16 +29,33 @@ interface AppState {
   // --- UI状態 ---
   selectedParkId: string | null;
   isSearchPanelOpen: boolean;
+  currentView: "map" | "about";
 
   // --- アクション ---
   loadParks: () => Promise<void>;
   toggleFacility: (key: FacilityKey) => void;
   setMode: (mode: SearchMode) => void;
   clearCondition: () => void;
+  setNameQuery: (query: string) => void;
   selectPark: (id: string | null) => void;
   setUserLocation: (coords: Coordinates) => void;
   openSearchPanel: () => void;
   closeSearchPanel: () => void;
+  setView: (view: "map" | "about") => void;
+}
+
+/** 名前フィルタ + 設備フィルタを合成して適用する */
+function applyFilters(
+  allParks: Park[],
+  condition: SearchCondition,
+  nameQuery: string,
+): Park[] {
+  const facilityFiltered = filterParks(allParks, condition);
+  if (!nameQuery.trim()) return facilityFiltered;
+  const q = nameQuery.trim().toLowerCase();
+  return facilityFiltered.filter((p) =>
+    p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q),
+  );
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -46,9 +64,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   isLoading: false,
   loadError: null,
   condition: EMPTY_CONDITION,
+  nameQuery: "",
   userLocation: null,
   selectedParkId: null,
   isSearchPanelOpen: false,
+  currentView: "map",
 
   loadParks: async () => {
     set({ isLoading: true, loadError: null });
@@ -64,20 +84,26 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   toggleFacility: (key) => {
-    const { condition, allParks } = get();
+    const { condition, allParks, nameQuery } = get();
     const next = toggleFacility(condition, key);
-    set({ condition: next, filteredParks: filterParks(allParks, next) });
+    set({ condition: next, filteredParks: applyFilters(allParks, next, nameQuery) });
   },
 
   setMode: (mode) => {
-    const { condition, allParks } = get();
+    const { condition, allParks, nameQuery } = get();
     const next = setMode(condition, mode);
-    set({ condition: next, filteredParks: filterParks(allParks, next) });
+    set({ condition: next, filteredParks: applyFilters(allParks, next, nameQuery) });
   },
 
   clearCondition: () => {
+    const { allParks, nameQuery } = get();
     const next = clearCondition(get().condition);
-    set({ condition: next, filteredParks: get().allParks });
+    set({ condition: next, filteredParks: applyFilters(allParks, next, nameQuery) });
+  },
+
+  setNameQuery: (query) => {
+    const { allParks, condition } = get();
+    set({ nameQuery: query, filteredParks: applyFilters(allParks, condition, query) });
   },
 
   selectPark: (id) => {
@@ -94,6 +120,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   closeSearchPanel: () => {
     set({ isSearchPanelOpen: false });
+  },
+
+  setView: (view) => {
+    set({ currentView: view, isSearchPanelOpen: false, selectedParkId: null });
   },
 }));
 

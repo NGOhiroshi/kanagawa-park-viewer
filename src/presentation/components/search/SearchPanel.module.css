@@ -5,6 +5,85 @@
   gap: var(--space-4);
 }
 
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+/* 公園名検索エリア */
+.nameSearch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.nameLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.nameInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: var(--space-3);
+  font-size: var(--font-size-base);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.nameInput {
+  width: 100%;
+  min-height: var(--min-tap-size);
+  padding: 0 var(--space-10) 0 calc(var(--space-3) + var(--space-5));
+  border: 1.5px solid var(--color-primary-200);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-fast);
+  /* input[type=search] のデフォルトUIを除去 */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.nameInput:focus {
+  border-color: var(--color-primary-500);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+.nameInput::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* ネイティブのクリアボタンを隠す (Chrome/Safari) */
+.nameInput::-webkit-search-cancel-button {
+  display: none;
+}
+
+.clearInput {
+  position: absolute;
+  right: var(--space-2);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-100);
+  color: var(--color-primary-700);
+  font-size: var(--font-size-sm);
+}
+
+/* 設備フィルタのサブヘッダー */
 .header {
   display: flex;
   align-items: center;
@@ -12,8 +91,8 @@
   gap: var(--space-4);
 }
 
-.title {
-  font-size: var(--font-size-lg);
+.subTitle {
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
 }

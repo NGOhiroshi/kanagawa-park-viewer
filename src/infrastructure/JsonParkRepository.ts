@@ -27,13 +27,17 @@ interface ParksJson {
   parks: ParkTuple[];
 }
 
+// `1 << i` は JavaScript の 32bit 整数演算に限定されるため
+// ビット位置 31 以上で誤動作する（例: 1 << 41 = 512 = 1 << 9 に化ける）。
+// parks.json の設備マスクは最大 41bit を使うため BigInt で安全に展開する。
 function unpackFacilities(
   mask: number,
   keys: FacilityKey[],
 ): Record<FacilityKey, boolean> {
+  const bigMask = BigInt(mask);
   const result = {} as Record<FacilityKey, boolean>;
   keys.forEach((key, i) => {
-    result[key] = Boolean(mask & (1 << i));
+    result[key] = Boolean(bigMask & (BigInt(1) << BigInt(i)));
   });
   return result;
 }
