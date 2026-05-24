@@ -1,0 +1,30 @@
+.sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-bottom-sheet);
+  max-height: 80dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* 閉じている状態: 画面外に隠す */
+  transform: translateY(100%);
+  transition: transform var(--transition-normal);
+  /* -webkit-overflow-scrolling は廃止済み、overscroll-behavior で代替 */
+}
+
+.sheet.open {
+  transform: translateY(0);
+}
+
+.handle {
+  width: 40px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-300);
+  margin: var(--space-3) auto var(--space-2);
+  flex-shrink: 0;
+}

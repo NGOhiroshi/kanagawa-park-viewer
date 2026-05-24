@@ -1,0 +1,30 @@
+/* スキップリンク: キーボード・スクリーンリーダー向け */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-primary-600);
+  color: var(--color-text-on-primary);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-sm);
+  z-index: calc(var(--z-overlay) + 10);
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: var(--space-4);
+}
+
+/* スクリーンリーダー専用テキスト (visually hidden) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

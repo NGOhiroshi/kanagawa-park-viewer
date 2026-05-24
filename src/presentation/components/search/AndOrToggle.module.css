@@ -1,0 +1,23 @@
+.group {
+  display: flex;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-100);
+  padding: var(--space-1);
+  gap: var(--space-1);
+}
+
+.btn {
+  min-width: var(--min-tap-size);
+  min-height: var(--min-tap-size);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-700);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.btn.active {
+  background: var(--color-primary-500);
+  color: var(--color-text-on-primary);
+}

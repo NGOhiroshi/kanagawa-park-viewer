@@ -1,0 +1,30 @@
+.badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  min-height: 32px;
+}
+
+.badge.present {
+  background: var(--color-facility-present);
+  color: var(--color-facility-present-text);
+}
+
+.badge.absent {
+  background: var(--color-facility-absent);
+  color: var(--color-facility-absent-text);
+}
+
+.icon {
+  font-size: var(--font-size-base);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.label {
+  line-height: var(--line-height-tight);
+}
