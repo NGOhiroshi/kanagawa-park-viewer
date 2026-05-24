@@ -30,6 +30,9 @@ export function AboutPage() {
           </ul>
         </section>
 
+        {/* 免責事項バナー */}
+        <p className={styles.disclaimer}>{a.note} {a.noteText}</p>
+
         <section className={styles.section} aria-labelledby="about-data">
           <h2 id="about-data" className={styles.sectionTitle}>{a.dataHeading}</h2>
 
@@ -61,8 +64,6 @@ export function AboutPage() {
               </dd>
               <dt>{a.count}</dt>
               <dd>{a.countValue}</dd>
-              <dt>{a.note}</dt>
-              <dd>{a.noteText}</dd>
             </dl>
           </div>
 

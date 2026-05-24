@@ -272,9 +272,9 @@ const ja: AppTranslations = {
     license: "ライセンス",
     count: "件数",
     countValue: "約 8,094 件（2026年5月時点）",
-    note: "注意",
+    note: "⚠️ 免責事項",
     noteText:
-      "データは自治体への届出情報に基づくため、実際の設備状況と異なる場合があります。最新情報は各公園の管理者にご確認ください。",
+      "本アプリの情報は神奈川県オープンデータ（届出ベース）を元にしており、実際の設備状況・開園時間・休園日等と異なる場合があります。掲載情報に基づいて生じたいかなる損害についても開発者は責任を負いません。最新・正確な情報は各公園の管理者または神奈川県の公式サイトにてご確認ください。",
     mapTilesTitle: "地図タイル",
     mapTilesText: "地図表示には国土地理院が提供する地理院タイルを使用しています。",
     geocodingTitle: "ジオコーディング",
@@ -289,7 +289,7 @@ const ja: AppTranslations = {
     feedbackHeading: "フィードバック",
     feedbackText: "データの誤りや機能のご要望は、GitHubのIssueからお知らせください。",
     copyright: "© 2026 神奈川公園ビューワー",
-    disclaimer: "このサービスは神奈川県・国土地理院とは無関係の個人プロジェクトです。",
+    disclaimer: "本サービスは神奈川県・国土地理院とは無関係の個人プロジェクトです。掲載情報の正確性を保証するものではなく、利用によって生じた損害について開発者は一切の責任を負いません。",
   },
 };
 
@@ -449,9 +449,9 @@ const en: AppTranslations = {
     license: "License",
     count: "Count",
     countValue: "Approx. 8,094 parks (as of May 2026)",
-    note: "Note",
+    note: "⚠️ Disclaimer",
     noteText:
-      "Data is based on information filed with local governments, so actual facility conditions may differ. Please confirm the latest information with each park's management.",
+      "Information in this app is based on Kanagawa Prefecture open data (filed records) and may differ from actual facility conditions, opening hours, or closed days. The developer accepts no liability for any damages arising from use of this information. Please verify with each park's management or Kanagawa Prefecture's official website for the latest details.",
     mapTilesTitle: "Map Tiles",
     mapTilesText:
       "Map display uses Geographic Survey Institute tiles provided by the Geospatial Information Authority of Japan.",
@@ -468,7 +468,7 @@ const en: AppTranslations = {
     feedbackText: "Please report data errors or feature requests via GitHub Issues.",
     copyright: "© 2026 Kanagawa Park Viewer",
     disclaimer:
-      "This service is an independent project unaffiliated with Kanagawa Prefecture or the Geospatial Information Authority of Japan.",
+      "This service is an independent project unaffiliated with Kanagawa Prefecture or the Geospatial Information Authority of Japan. The developer makes no guarantees regarding the accuracy of the information and accepts no liability for any damages arising from its use.",
   },
 };
 
