@@ -7,7 +7,7 @@ dist/
 .vite/
 coverage/
 .cache/
-.claude/settings.local.json
+.claude/
 
 # Large regeneratable intermediate from parse-csv.ts (rebuild via `pnpm parse`)
 data/processed/parks.base.json

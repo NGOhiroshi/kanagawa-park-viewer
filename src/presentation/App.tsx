@@ -176,7 +176,7 @@ export function App() {
         onClose={() => setIsSettingsOpen(false)}
         titleId="settings-panel-title"
       >
-        <SettingsPanel />
+        <SettingsPanel onClose={() => setIsSettingsOpen(false)} />
       </BottomSheet>
 
       {bottomSheetOpen && (

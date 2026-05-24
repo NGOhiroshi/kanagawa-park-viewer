@@ -6,14 +6,28 @@ const LOCALES: Locale[] = ["ja", "en"];
 const THEMES: Theme[] = ["light", "system", "dark"];
 const THEME_ICONS: Record<Theme, string> = { light: "☀️", system: "🌐", dark: "🌙" };
 
-export function SettingsPanel() {
+interface Props {
+  onClose: () => void;
+}
+
+export function SettingsPanel({ onClose }: Props) {
   const { t, locale, setLocale, theme, setTheme } = useLocale();
 
   return (
     <section aria-label={t.settings.title} className={styles.panel}>
-      <h2 id="settings-panel-title" className={styles.title}>
-        {t.settings.title}
-      </h2>
+      <div className={styles.header}>
+        <h2 id="settings-panel-title" className={styles.title}>
+          {t.settings.title}
+        </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          className={styles.closeBtn}
+          aria-label={t.settings.closeAria}
+        >
+          ✕
+        </button>
+      </div>
 
       {/* 言語 */}
       <div className={styles.row}>

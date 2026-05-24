@@ -194,12 +194,14 @@ export function ParkMap() {
     }
 
     if (locationMarkerRef.current) {
-      // 位置更新のみ（DOM 再生成不要）
       locationMarkerRef.current.setLngLat([userLocation.lng, userLocation.lat]);
       return;
     }
 
+    // GPS が連続更新されると map.once("load", ...) が複数登録されて
+    // ロード時に2個生成されるバグを防ぐ: addMarker 内でも二重生成をガード
     const addMarker = () => {
+      if (locationMarkerRef.current) return;
       locationMarkerRef.current = new maplibregl.Marker({
         element: createLocationMarkerEl(),
         anchor: "bottom",
@@ -208,11 +210,12 @@ export function ParkMap() {
         .addTo(map);
     };
 
-    // スタイルロード前でも後でも対応
     if (map.isStyleLoaded()) {
       addMarker();
     } else {
       map.once("load", addMarker);
+      // effect 再実行時に未発火の listener を確実に除去
+      return () => { map.off("load", addMarker); };
     }
   }, [userLocation]);
 
