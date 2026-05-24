@@ -3,6 +3,7 @@ import type { Coordinates } from "../../../domain/geo/haversine";
 import { FACILITIES } from "../../../domain/park/Park";
 import type { Park } from "../../../domain/park/Park";
 import { useAppStore } from "../../../application/store";
+import { useLocale } from "../../../i18n/useLocale";
 import styles from "./ParkListItem.module.css";
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 
 export function ParkListItem({ park, origin, onClick }: Props) {
   const { condition } = useAppStore();
+  const { t } = useLocale();
 
   const distance =
     park.lat !== null && park.lng !== null
@@ -21,7 +23,7 @@ export function ParkListItem({ park, origin, onClick }: Props) {
 
   const activeFacilityLabels = [...condition.facilities]
     .filter((key) => park.facilities[key])
-    .map((key) => FACILITIES.find((f) => f.key === key)?.ja ?? key);
+    .map((key) => t.facilityNames[key] ?? FACILITIES.find((f) => f.key === key)?.ja ?? key);
 
   return (
     <button type="button" className={styles.item} onClick={onClick}>
@@ -33,7 +35,7 @@ export function ParkListItem({ park, origin, onClick }: Props) {
       </div>
       <p className={styles.address}>{park.address}</p>
       {activeFacilityLabels.length > 0 && (
-        <div className={styles.badges} aria-label="絞り込み中の設備">
+        <div className={styles.badges} aria-label={t.list.activeFacilities}>
           {activeFacilityLabels.map((label) => (
             <span key={label} className={styles.badge}>{label}</span>
           ))}

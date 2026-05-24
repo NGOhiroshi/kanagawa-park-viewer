@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useAppStore } from "../../../application/store";
+import { useLocale } from "../../../i18n/useLocale";
 import { haversineDistance } from "../../../domain/geo/haversine";
 import type { Park } from "../../../domain/park/Park";
 import styles from "./ParkMap.module.css";
@@ -57,6 +58,7 @@ export function ParkMap() {
   const starMarkerRef = useRef<maplibregl.Marker | null>(null);     // フォーカス時のみ
 
   const { filteredParks, allParks, userLocation, focusedParkId, selectPark } = useAppStore();
+  const { t } = useLocale();
 
   // マップ初期化（マウント時のみ）
   useEffect(() => {
@@ -279,7 +281,7 @@ export function ParkMap() {
       ref={containerRef}
       className={styles.mapContainer}
       role="img"
-      aria-label={`神奈川県の公園マップ。${filteredParks.length}件を表示中。`}
+      aria-label={t.map.ariaLabel(filteredParks.length)}
     />
   );
 }

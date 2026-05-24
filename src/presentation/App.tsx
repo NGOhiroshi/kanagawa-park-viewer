@@ -1,10 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppStore, useSelectedPark } from "../application/store";
 import { watchUserLocation } from "../infrastructure/GeolocationService";
+import { useLocale } from "../i18n/useLocale";
 import { ParkMap } from "./components/map/ParkMap";
 import { SearchPanel } from "./components/search/SearchPanel";
 import { ParkCard } from "./components/park/ParkCard";
 import { ParkList } from "./components/list/ParkList";
+import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { BottomSheet } from "./components/common/BottomSheet";
 import { AboutPage } from "./components/about/AboutPage";
 import styles from "./App.module.css";
@@ -31,13 +33,13 @@ export function App() {
     setGeolocationStatus,
   } = useAppStore();
   const selectedPark = useSelectedPark();
+  const { t } = useLocale();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // 初回マウント時にデータ読み込み
   useEffect(() => {
     loadParks();
   }, [loadParks]);
 
-  // 現在地を継続取得
   useEffect(() => {
     return watchUserLocation(
       (coords) => {
@@ -54,7 +56,7 @@ export function App() {
 
   const showSearchPanel = isSearchPanelOpen && !selectedPark;
   const showParkCard = selectedPark !== null;
-  const bottomSheetOpen = showSearchPanel || showParkCard || isListOpen;
+  const bottomSheetOpen = showSearchPanel || showParkCard || isListOpen || isSettingsOpen;
   const activeFilterCount = condition.facilities.size + (nameQuery.trim() ? 1 : 0);
 
   if (currentView === "about") {
@@ -63,11 +65,10 @@ export function App() {
 
   return (
     <>
-      {/* マップ: 全画面背景 */}
-      <main id="main-content" className={styles.mapWrapper} aria-label="公園マップ">
+      <main id="main-content" className={styles.mapWrapper} aria-label={t.map.ariaLabel(filteredParks.length)}>
         {isLoading && (
           <div className={styles.loadingOverlay} role="status" aria-live="polite">
-            <p>公園データを読み込んでいます…</p>
+            <p>{t.loading}</p>
           </div>
         )}
         {loadError && (
@@ -78,7 +79,6 @@ export function App() {
         <ParkMap />
       </main>
 
-      {/* フローティング検索バー */}
       <div className={styles.topBar}>
         <button
           type="button"
@@ -86,19 +86,18 @@ export function App() {
           onClick={openSearchPanel}
           aria-expanded={isSearchPanelOpen}
           aria-controls="search-panel"
-          aria-label="公園を検索・絞り込む"
+          aria-label={t.topBar.findParksAria}
         >
           🔍
-          <span className={styles.searchLabel}>公園を探す</span>
+          <span className={styles.searchLabel}>{t.topBar.findParks}</span>
           <span
             className={`${styles.countBadge} ${activeFilterCount > 0 ? styles.countBadgeActive : ""}`}
-            aria-label={`${filteredParks.length}件の公園`}
+            aria-label={t.topBar.parksCount(filteredParks.length)}
           >
             {filteredParks.length}
           </span>
         </button>
 
-        {/* 現在地ボタン: タップで位置情報許可ダイアログを出す */}
         <button
           type="button"
           className={`${styles.locationBtn} ${geolocationStatus === "granted" ? styles.locationBtnActive : ""} ${geolocationStatus === "denied" ? styles.locationBtnDenied : ""}`}
@@ -116,28 +115,35 @@ export function App() {
           }}
           aria-label={
             geolocationStatus === "granted" && userLocation
-              ? "現在地取得中"
+              ? t.topBar.locationGranted
               : geolocationStatus === "denied"
-              ? "位置情報がブロックされています"
-              : "現在地を取得する"
+              ? t.topBar.locationDenied
+              : t.topBar.locationGet
           }
           aria-pressed={geolocationStatus === "granted"}
         >
           📍
         </button>
 
-        {/* About ページリンク */}
+        <button
+          type="button"
+          className={styles.settingsBtn}
+          onClick={() => setIsSettingsOpen(true)}
+          aria-label={t.topBar.settings}
+        >
+          ⚙️
+        </button>
+
         <button
           type="button"
           className={styles.aboutBtn}
           onClick={() => setView("about")}
-          aria-label="このアプリについて"
+          aria-label={t.topBar.aboutApp}
         >
           ℹ️
         </button>
       </div>
 
-      {/* ボトムシート: 検索パネル */}
       <BottomSheet
         isOpen={showSearchPanel}
         onClose={closeSearchPanel}
@@ -148,7 +154,6 @@ export function App() {
         </div>
       </BottomSheet>
 
-      {/* ボトムシート: 公園詳細 */}
       <BottomSheet
         isOpen={showParkCard}
         onClose={() => selectPark(null)}
@@ -157,7 +162,6 @@ export function App() {
         <ParkCard />
       </BottomSheet>
 
-      {/* ボトムシート: 公園リスト（ParkCard 表示中は非表示、閉じると戻る） */}
       <BottomSheet
         isOpen={isListOpen && !selectedPark}
         onClose={closeList}
@@ -167,11 +171,23 @@ export function App() {
         <ParkList />
       </BottomSheet>
 
-      {/* ボトムシートが開いているときの背景オーバーレイ */}
+      <BottomSheet
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        titleId="settings-panel-title"
+      >
+        <SettingsPanel />
+      </BottomSheet>
+
       {bottomSheetOpen && (
         <div
           className={styles.overlay}
-          onClick={() => { closeSearchPanel(); selectPark(null); closeList(); }}
+          onClick={() => {
+            closeSearchPanel();
+            selectPark(null);
+            closeList();
+            setIsSettingsOpen(false);
+          }}
           aria-hidden="true"
         />
       )}
