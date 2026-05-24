@@ -1,0 +1,2 @@
+name = "kanagawa-park-viewer"
+pages_build_output_dir = "dist"
