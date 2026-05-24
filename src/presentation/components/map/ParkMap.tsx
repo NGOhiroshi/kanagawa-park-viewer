@@ -81,7 +81,7 @@ export function ParkMap() {
       zoom: DEFAULT_ZOOM,
     });
 
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
+    map.addControl(new maplibregl.NavigationControl(), "bottom-right");
 
     map.on("load", () => {
       const { filteredParks: currentParks } = useAppStore.getState();
