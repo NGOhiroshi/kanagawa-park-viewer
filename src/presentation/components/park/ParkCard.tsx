@@ -7,6 +7,16 @@ import styles from "./ParkCard.module.css";
 const GOOGLE_MAPS_URL = (name: string, address: string) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + " " + address)}`;
 
+const isSafeUrl = (url: string | undefined | null): url is string => {
+  if (!url) return false;
+  try {
+    const { protocol } = new URL(url);
+    return protocol === "https:" || protocol === "http:";
+  } catch {
+    return false;
+  }
+};
+
 export function ParkCard() {
   const park = useSelectedPark();
   const { selectPark, focusPark, closeList, isListOpen } = useAppStore();
@@ -94,7 +104,7 @@ export function ParkCard() {
         >
           {t.card.navigate}
         </a>
-        {park.url && (
+        {isSafeUrl(park.url) && (
           <a
             href={park.url}
             target="_blank"
