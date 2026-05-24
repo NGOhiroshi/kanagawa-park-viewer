@@ -36,7 +36,7 @@ const grouped = CATEGORY_ORDER.map((cat) => ({
  * - カテゴリごとに <section> + <h3> でアウトライン構造化
  */
 export function SearchPanel() {
-  const { filteredParks, condition, nameQuery, clearCondition, setNameQuery } = useAppStore();
+  const { filteredParks, condition, nameQuery, clearCondition, setNameQuery, openList } = useAppStore();
   const selectedCount = condition.facilities.size;
   const nameInputId = useId();
   const hasAnyFilter = selectedCount > 0 || nameQuery.trim() !== "";
@@ -122,6 +122,19 @@ export function SearchPanel() {
             </div>
           </section>
         ))}
+      </div>
+
+      {/* 公園リスト表示ボタン（スティッキー） */}
+      <div className={styles.listBtnWrapper}>
+        <button
+          type="button"
+          className={styles.listBtn}
+          onClick={openList}
+          disabled={filteredParks.length === 0}
+          aria-label={`${filteredParks.length}件の公園リストを距離順で見る`}
+        >
+          {filteredParks.length}件の公園リストを見る →
+        </button>
       </div>
     </section>
   );

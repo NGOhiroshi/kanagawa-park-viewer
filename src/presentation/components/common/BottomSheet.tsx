@@ -7,6 +7,8 @@ interface Props {
   /** アクセシビリティ: ダイアログのタイトル (aria-labelledby 用) */
   titleId: string;
   children: React.ReactNode;
+  /** 高さを 90dvh に広げる（リスト表示用） */
+  tall?: boolean;
 }
 
 /**
@@ -16,7 +18,7 @@ interface Props {
  * - 開閉時にフォーカスを適切に移動（フォーカストラップ）。
  * - Escape キーで閉じる。
  */
-export function BottomSheet({ isOpen, onClose, titleId, children }: Props) {
+export function BottomSheet({ isOpen, onClose, titleId, children, tall }: Props) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<Element | null>(null);
 
@@ -50,7 +52,7 @@ export function BottomSheet({ isOpen, onClose, titleId, children }: Props) {
       aria-modal="true"
       aria-labelledby={titleId}
       tabIndex={-1}
-      className={`${styles.sheet} ${isOpen ? styles.open : ""}`}
+      className={`${styles.sheet} ${isOpen ? styles.open : ""} ${tall ? styles.tall : ""}`}
       // マウスユーザーにはフォーカスリングを見せない
       style={{ outline: "none" }}
     >

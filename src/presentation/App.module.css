@@ -85,6 +85,32 @@
   color: var(--color-text-on-primary);
 }
 
+/* 現在地ボタン */
+.locationBtn {
+  width: var(--min-tap-size);
+  height: var(--min-tap-size);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-overlay);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  opacity: 0.6;
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+}
+
+.locationBtnActive {
+  opacity: 1;
+  background: var(--color-primary-100);
+}
+
+.locationBtnDenied {
+  opacity: 0.35;
+}
+
 /* About ボタン */
 .aboutBtn {
   width: var(--min-tap-size);

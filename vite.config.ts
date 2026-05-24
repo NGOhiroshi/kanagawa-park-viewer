@@ -1,10 +1,15 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import basicSsl from "@vitejs/plugin-basic-ssl";
 import path from "path";
+
+// MOBILE_DEV=1 pnpm dev:mobile で起動するとき HTTPS + ネット公開
+const isMobileDev = process.env.MOBILE_DEV === "1";
 
 export default defineConfig({
   plugins: [
+    ...(isMobileDev ? [basicSsl()] : []),
     react(),
     VitePWA({
       registerType: "autoUpdate",
@@ -38,6 +43,10 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    https: isMobileDev,
+    host: isMobileDev, // ネットワーク全体に公開（スマホからアクセス可）
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -3,6 +3,8 @@ export interface Coordinates {
   lng: number;
 }
 
+export const KANAGAWA_PREFECTURAL_OFFICE: Coordinates = { lat: 35.4476, lng: 139.6425 };
+
 const EARTH_RADIUS_M = 6_371_000;
 
 /** 2点間の直線距離をメートルで返す（ハバーサイン公式）。 */

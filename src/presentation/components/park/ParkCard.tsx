@@ -17,24 +17,44 @@ const GOOGLE_MAPS_URL = (name: string, address: string) =>
  */
 export function ParkCard() {
   const park = useSelectedPark();
-  const { selectPark } = useAppStore();
+  const { selectPark, focusPark, closeList, isListOpen } = useAppStore();
 
   if (!park) return null;
 
   const presentFacilities = FACILITIES.filter((f) => park.facilities[f.key]);
   const absentFacilities  = FACILITIES.filter((f) => !park.facilities[f.key]);
 
+  const handleFocus = () => {
+    focusPark(park.id);
+    closeList();
+    selectPark(null);
+  };
+
   return (
     <article aria-label={park.name} className={styles.card}>
-      {/* 閉じるボタン */}
-      <button
-        type="button"
-        onClick={() => selectPark(null)}
-        className={styles.closeBtn}
-        aria-label={`${park.name} の詳細を閉じる`}
-      >
-        ✕
-      </button>
+      {/* 閉じる / リストに戻る */}
+      <div className={styles.topActions}>
+        {isListOpen ? (
+          <button
+            type="button"
+            onClick={() => selectPark(null)}
+            className={styles.backBtn}
+            aria-label="公園リストに戻る"
+          >
+            ← リストに戻る
+          </button>
+        ) : (
+          <div />
+        )}
+        <button
+          type="button"
+          onClick={() => selectPark(null)}
+          className={styles.closeBtn}
+          aria-label={`${park.name} の詳細を閉じる`}
+        >
+          ✕
+        </button>
+      </div>
 
       <h2 id="park-card-title" className={styles.parkName}>{park.name}</h2>
       {park.parkType && <p className={styles.parkType}>{park.parkType}</p>}
@@ -67,6 +87,14 @@ export function ParkCard() {
 
       {/* アクションリンク */}
       <div className={styles.actions}>
+        <button
+          type="button"
+          onClick={handleFocus}
+          className={styles.focusBtn}
+          aria-label={`${park.name} の位置を地図でフォーカス`}
+        >
+          🗺️ 地図でフォーカス
+        </button>
         <a
           href={GOOGLE_MAPS_URL(park.name, park.address)}
           target="_blank"
@@ -74,7 +102,7 @@ export function ParkCard() {
           className={styles.mapsLink}
           aria-label={`${park.name} をGoogle Mapsで開く（新しいタブ）`}
         >
-          🗺️ Google Maps でナビ
+          ナビ ↗
         </a>
         {park.url && (
           <a
@@ -84,7 +112,7 @@ export function ParkCard() {
             className={styles.officialLink}
             aria-label={`${park.name} の公式ページを開く（新しいタブ）`}
           >
-            公式ページ ↗
+            公式 ↗
           </a>
         )}
       </div>

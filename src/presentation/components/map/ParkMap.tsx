@@ -2,20 +2,43 @@ import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useAppStore } from "../../../application/store";
+import { haversineDistance } from "../../../domain/geo/haversine";
+import type { Park } from "../../../domain/park/Park";
 import styles from "./ParkMap.module.css";
 
 const GSI_TILE_URL = "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png";
 const GSI_ATTRIBUTION = '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>';
 
-// 神奈川中心
-const DEFAULT_CENTER: [number, number] = [139.45, 35.54];
+const DEFAULT_CENTER: [number, number] = [139.6425, 35.4476]; // 神奈川県庁
 const DEFAULT_ZOOM = 10;
+
+function makeParkGeoJSON(parks: Park[]): GeoJSON.FeatureCollection<GeoJSON.Point> {
+  return {
+    type: "FeatureCollection",
+    features: parks
+      .filter((p) => p.lat !== null && p.lng !== null)
+      .map((p) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [p.lng!, p.lat!] },
+        properties: { id: p.id, name: p.name },
+      })),
+  };
+}
 
 export function ParkMap() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const hasFlownToUserRef = useRef(false);
+  const starMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const personMarkerRef = useRef<maplibregl.Marker | null>(null);
 
-  const { filteredParks, userLocation, selectPark } = useAppStore();
+  const {
+    filteredParks,
+    allParks,
+    userLocation,
+    focusedParkId,
+    selectPark,
+  } = useAppStore();
 
   // マップ初期化（マウント時のみ）
   useEffect(() => {
@@ -40,23 +63,16 @@ export function ParkMap() {
       zoom: DEFAULT_ZOOM,
     });
 
-    // ナビゲーションコントロール（アクセシビリティ: キーボードでズーム可）
+    // ナビゲーションコントロール
     map.addControl(new maplibregl.NavigationControl(), "top-right");
-    // 現在地ボタン
-    map.addControl(
-      new maplibregl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true,
-        showAccuracyCircle: false,
-      }),
-      "top-right",
-    );
 
     map.on("load", () => {
-      // 公園ソース（クラスタリング有効）
+      // loadParks がスタイルロード前に完了している場合も即座に反映
+      const { filteredParks: currentParks } = useAppStore.getState();
+
       map.addSource("parks", {
         type: "geojson",
-        data: { type: "FeatureCollection", features: [] },
+        data: makeParkGeoJSON(currentParks),
         cluster: true,
         clusterMaxZoom: 14,
         clusterRadius: 48,
@@ -71,13 +87,11 @@ export function ParkMap() {
         paint: {
           "circle-color": [
             "step", ["get", "point_count"],
-            "#86efac",  // 〜10件: 薄いグリーン
-            10, "#22c55e",  // 〜50件: プライマリグリーン
-            50, "#16a34a",  // 50件〜: 濃いグリーン
+            "#86efac", 10, "#22c55e", 50, "#16a34a",
           ],
           "circle-radius": [
             "step", ["get", "point_count"],
-            20, 10, 28, 50, 36,
+            22, 10, 30, 50, 38,
           ],
           "circle-stroke-width": 2,
           "circle-stroke-color": "#ffffff",
@@ -98,7 +112,7 @@ export function ParkMap() {
         paint: { "text-color": "#ffffff" },
       });
 
-      // 個別公園マーカー
+      // 個別公園マーカー（タップしやすいサイズ）
       map.addLayer({
         id: "unclustered-park",
         type: "circle",
@@ -106,8 +120,8 @@ export function ParkMap() {
         filter: ["!", ["has", "point_count"]],
         paint: {
           "circle-color": "#22c55e",
-          "circle-radius": 8,
-          "circle-stroke-width": 2,
+          "circle-radius": 14,
+          "circle-stroke-width": 3,
           "circle-stroke-color": "#ffffff",
         },
       });
@@ -118,9 +132,8 @@ export function ParkMap() {
         const clusterId = features[0]?.properties?.cluster_id as number | undefined;
         if (clusterId == null) return;
         const source = map.getSource("parks") as maplibregl.GeoJSONSource;
-        source.getClusterExpansionZoom(clusterId, (err, zoom) => {
-          if (err || zoom == null) return;
-          const center = (features[0].geometry as GeoJSON.Point).coordinates as [number, number];
+        const center = (features[0].geometry as GeoJSON.Point).coordinates as [number, number];
+        source.getClusterExpansionZoom(clusterId).then((zoom) => {
           map.easeTo({ center, zoom });
         });
       });
@@ -133,7 +146,6 @@ export function ParkMap() {
         if (id) selectPark(id);
       });
 
-      // カーソル変更（UXフィードバック）
       map.on("mouseenter", "clusters", () => { map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "clusters", () => { map.getCanvas().style.cursor = ""; });
       map.on("mouseenter", "unclustered-park", () => { map.getCanvas().style.cursor = "pointer"; });
@@ -148,37 +160,117 @@ export function ParkMap() {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded()) return;
-
     const source = map.getSource("parks") as maplibregl.GeoJSONSource | undefined;
     if (!source) return;
-
-    source.setData({
-      type: "FeatureCollection",
-      features: filteredParks
-        .filter((p) => p.lat !== null && p.lng !== null)
-        .map((p) => ({
-          type: "Feature",
-          geometry: {
-            type: "Point",
-            coordinates: [p.lng!, p.lat!],
-          },
-          properties: { id: p.id, name: p.name },
-        })),
-    });
+    source.setData(makeParkGeoJSON(filteredParks));
   }, [filteredParks]);
 
-  // 現在地が取れたら地図を移動
+  // 現在地が取れたら地図を移動（初回のみ）
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !userLocation) return;
+    if (!map || !userLocation || hasFlownToUserRef.current) return;
+    hasFlownToUserRef.current = true;
     map.flyTo({ center: [userLocation.lng, userLocation.lat], zoom: 13 });
   }, [userLocation]);
+
+  // フォーカスマーカー（星 + 人アイコン）
+  useEffect(() => {
+    const map = mapRef.current;
+
+    // 既存フォーカスマーカーを除去
+    starMarkerRef.current?.remove();
+    starMarkerRef.current = null;
+    personMarkerRef.current?.remove();
+    personMarkerRef.current = null;
+
+    if (!map || !focusedParkId) return;
+
+    const park = allParks.find((p) => p.id === focusedParkId);
+    if (!park || park.lat === null || park.lng === null) return;
+
+    // 星マーカー（外側ラッパー: アイコン + ラベル縦並び、タップで公園詳細を再表示）
+    const starEl = document.createElement("div");
+    starEl.setAttribute("aria-label", park.name);
+    starEl.style.cssText =
+      "display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;user-select:none;";
+
+    const starEmoji = document.createElement("div");
+    starEmoji.textContent = "⭐";
+    starEmoji.style.cssText =
+      "width:52px;height:52px;display:flex;align-items:center;justify-content:center;" +
+      "background:#15803d;border:3px solid #ffffff;border-radius:50%;font-size:28px;" +
+      "box-shadow:0 0 0 5px rgba(21,128,61,0.30),0 3px 14px rgba(0,0,0,0.45);";
+
+    const starLabel = document.createElement("span");
+    starLabel.textContent = park.name;
+    starLabel.style.cssText =
+      "background:#15803d;color:#ffffff;font-size:11px;font-weight:700;" +
+      "padding:2px 7px;border-radius:4px;white-space:nowrap;max-width:180px;" +
+      "overflow:hidden;text-overflow:ellipsis;" +
+      "box-shadow:0 1px 5px rgba(0,0,0,0.35);";
+
+    // ラベルを上、バッジを下（anchor:"bottom" で座標 = バッジ下端 = ピンの先端）
+    starEl.append(starLabel, starEmoji);
+    starEl.addEventListener("click", () => selectPark(focusedParkId));
+    starMarkerRef.current = new maplibregl.Marker({ element: starEl, anchor: "bottom" })
+      .setLngLat([park.lng, park.lat])
+      .addTo(map);
+
+    // 人アイコンマーカー（現在地が取れている場合のみ）
+    if (userLocation) {
+      // 外側ラッパー（アイコン + ラベル縦並び）
+      const personEl = document.createElement("div");
+      personEl.setAttribute("aria-label", "現在地");
+      personEl.style.cssText =
+        "display:flex;flex-direction:column;align-items:center;gap:4px;user-select:none;";
+
+      // 青い円形バッジ
+      const badge = document.createElement("div");
+      badge.textContent = "🧍";
+      badge.style.cssText =
+        "width:52px;height:52px;display:flex;align-items:center;justify-content:center;" +
+        "background:#1d4ed8;border:3px solid #ffffff;border-radius:50%;font-size:28px;" +
+        "box-shadow:0 0 0 5px rgba(29,78,216,0.30),0 3px 14px rgba(0,0,0,0.45);";
+
+      // "現在地" テキストラベル
+      const label = document.createElement("span");
+      label.textContent = "現在地";
+      label.style.cssText =
+        "background:#1d4ed8;color:#ffffff;font-size:11px;font-weight:700;" +
+        "padding:2px 7px;border-radius:4px;white-space:nowrap;" +
+        "box-shadow:0 1px 5px rgba(0,0,0,0.35);";
+
+      // ラベルを上、バッジを下（anchor:"bottom" で座標 = バッジ下端 = 足元）
+      personEl.append(label, badge);
+      personMarkerRef.current = new maplibregl.Marker({ element: personEl, anchor: "bottom" })
+        .setLngLat([userLocation.lng, userLocation.lat])
+        .addTo(map);
+
+      const distM = haversineDistance(
+        { lat: park.lat, lng: park.lng },
+        { lat: userLocation.lat, lng: userLocation.lng },
+      );
+
+      if (distM < 300) {
+        // 近すぎると fitBounds の bounds がほぼゼロになり world zoom になるため flyTo で固定
+        map.flyTo({ center: [park.lng, park.lat], zoom: 16 });
+      } else {
+        // extend() で SW/NE を正しく計算（引数順序依存のバグを回避）
+        const bounds = new maplibregl.LngLatBounds();
+        bounds.extend([park.lng, park.lat]);
+        bounds.extend([userLocation.lng, userLocation.lat]);
+        map.fitBounds(bounds, { padding: 80, maxZoom: 15 });
+      }
+    } else {
+      // 現在地不明: 公園だけにフライト
+      map.flyTo({ center: [park.lng, park.lat], zoom: 16 });
+    }
+  }, [focusedParkId, allParks, userLocation, selectPark]);
 
   return (
     <div
       ref={containerRef}
       className={styles.mapContainer}
-      // スクリーンリーダー向け: マップは alt テキストで補完
       role="img"
       aria-label={`神奈川県の公園マップ。${filteredParks.length}件を表示中。`}
     />

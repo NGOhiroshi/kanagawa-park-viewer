@@ -29,7 +29,10 @@ interface AppState {
   // --- UI状態 ---
   selectedParkId: string | null;
   isSearchPanelOpen: boolean;
+  isListOpen: boolean;
+  focusedParkId: string | null;
   currentView: "map" | "about";
+  geolocationStatus: "idle" | "granted" | "denied" | "unavailable";
 
   // --- アクション ---
   loadParks: () => Promise<void>;
@@ -38,9 +41,14 @@ interface AppState {
   clearCondition: () => void;
   setNameQuery: (query: string) => void;
   selectPark: (id: string | null) => void;
+  selectParkFromList: (id: string) => void;
   setUserLocation: (coords: Coordinates) => void;
+  setGeolocationStatus: (status: "idle" | "granted" | "denied" | "unavailable") => void;
   openSearchPanel: () => void;
   closeSearchPanel: () => void;
+  openList: () => void;
+  closeList: () => void;
+  focusPark: (id: string | null) => void;
   setView: (view: "map" | "about") => void;
 }
 
@@ -68,7 +76,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   userLocation: null,
   selectedParkId: null,
   isSearchPanelOpen: false,
+  isListOpen: false,
+  focusedParkId: null,
   currentView: "map",
+  geolocationStatus: "idle",
 
   loadParks: async () => {
     set({ isLoading: true, loadError: null });
@@ -107,23 +118,51 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   selectPark: (id) => {
-    set({ selectedParkId: id, isSearchPanelOpen: false });
+    if (id !== null) {
+      // マップ上のピンをタップ: リストも閉じる、フォーカスも解除
+      set({ selectedParkId: id, isSearchPanelOpen: false, isListOpen: false, focusedParkId: null });
+    } else {
+      // カードを閉じる: isListOpen・focusedParkId は変更しない
+      // (リストへ戻る / フォーカス継続のため)
+      set({ selectedParkId: null });
+    }
+  },
+
+  selectParkFromList: (id) => {
+    // リストから公園を選択: isListOpen は true のまま（「リストに戻る」用）
+    set({ selectedParkId: id, isSearchPanelOpen: false, focusedParkId: null });
   },
 
   setUserLocation: (coords) => {
     set({ userLocation: coords });
   },
 
+  setGeolocationStatus: (status) => {
+    set({ geolocationStatus: status });
+  },
+
   openSearchPanel: () => {
-    set({ isSearchPanelOpen: true, selectedParkId: null });
+    set({ isSearchPanelOpen: true, selectedParkId: null, isListOpen: false });
   },
 
   closeSearchPanel: () => {
     set({ isSearchPanelOpen: false });
   },
 
+  openList: () => {
+    set({ isListOpen: true, isSearchPanelOpen: false, selectedParkId: null, focusedParkId: null });
+  },
+
+  closeList: () => {
+    set({ isListOpen: false });
+  },
+
+  focusPark: (id) => {
+    set({ focusedParkId: id });
+  },
+
   setView: (view) => {
-    set({ currentView: view, isSearchPanelOpen: false, selectedParkId: null });
+    set({ currentView: view, isSearchPanelOpen: false, selectedParkId: null, isListOpen: false, focusedParkId: null });
   },
 }));
 
