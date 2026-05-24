@@ -48,7 +48,7 @@ export function SettingsPanel({ onClose }: Props) {
       </div>
 
       {/* テーマ */}
-      <div className={styles.row}>
+      <div className={`${styles.row} ${styles.rowStacked}`}>
         <span className={styles.label}>{t.settings.theme}</span>
         <div role="group" aria-label={t.settings.theme} className={styles.toggle}>
           {THEMES.map((th) => {
