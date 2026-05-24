@@ -25,20 +25,38 @@ function makeParkGeoJSON(parks: Park[]): GeoJSON.FeatureCollection<GeoJSON.Point
   };
 }
 
+function createLocationMarkerEl(): HTMLElement {
+  const el = document.createElement("div");
+  el.setAttribute("aria-label", "現在地");
+  el.style.cssText =
+    "display:flex;flex-direction:column;align-items:center;gap:4px;user-select:none;";
+
+  const badge = document.createElement("div");
+  badge.textContent = "🧍";
+  badge.style.cssText =
+    "width:52px;height:52px;display:flex;align-items:center;justify-content:center;" +
+    "background:#1d4ed8;border:3px solid #ffffff;border-radius:50%;font-size:28px;" +
+    "box-shadow:0 0 0 5px rgba(29,78,216,0.30),0 3px 14px rgba(0,0,0,0.45);";
+
+  const label = document.createElement("span");
+  label.textContent = "現在地";
+  label.style.cssText =
+    "background:#1d4ed8;color:#ffffff;font-size:11px;font-weight:700;" +
+    "padding:2px 7px;border-radius:4px;white-space:nowrap;" +
+    "box-shadow:0 1px 5px rgba(0,0,0,0.35);";
+
+  el.append(label, badge);
+  return el;
+}
+
 export function ParkMap() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const hasFlownToUserRef = useRef(false);
-  const starMarkerRef = useRef<maplibregl.Marker | null>(null);
-  const personMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const locationMarkerRef = useRef<maplibregl.Marker | null>(null); // 常時表示
+  const starMarkerRef = useRef<maplibregl.Marker | null>(null);     // フォーカス時のみ
 
-  const {
-    filteredParks,
-    allParks,
-    userLocation,
-    focusedParkId,
-    selectPark,
-  } = useAppStore();
+  const { filteredParks, allParks, userLocation, focusedParkId, selectPark } = useAppStore();
 
   // マップ初期化（マウント時のみ）
   useEffect(() => {
@@ -63,11 +81,9 @@ export function ParkMap() {
       zoom: DEFAULT_ZOOM,
     });
 
-    // ナビゲーションコントロール
     map.addControl(new maplibregl.NavigationControl(), "top-right");
 
     map.on("load", () => {
-      // loadParks がスタイルロード前に完了している場合も即座に反映
       const { filteredParks: currentParks } = useAppStore.getState();
 
       map.addSource("parks", {
@@ -78,7 +94,6 @@ export function ParkMap() {
         clusterRadius: 48,
       });
 
-      // クラスター円
       map.addLayer({
         id: "clusters",
         type: "circle",
@@ -89,16 +104,12 @@ export function ParkMap() {
             "step", ["get", "point_count"],
             "#86efac", 10, "#22c55e", 50, "#16a34a",
           ],
-          "circle-radius": [
-            "step", ["get", "point_count"],
-            22, 10, 30, 50, 38,
-          ],
+          "circle-radius": ["step", ["get", "point_count"], 22, 10, 30, 50, 38],
           "circle-stroke-width": 2,
           "circle-stroke-color": "#ffffff",
         },
       });
 
-      // クラスター件数ラベル
       map.addLayer({
         id: "cluster-count",
         type: "symbol",
@@ -112,7 +123,6 @@ export function ParkMap() {
         paint: { "text-color": "#ffffff" },
       });
 
-      // 個別公園マーカー（タップしやすいサイズ）
       map.addLayer({
         id: "unclustered-park",
         type: "circle",
@@ -126,7 +136,6 @@ export function ParkMap() {
         },
       });
 
-      // クラスタークリック → ズームイン
       map.on("click", "clusters", (e) => {
         const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
         const clusterId = features[0]?.properties?.cluster_id as number | undefined;
@@ -138,7 +147,6 @@ export function ParkMap() {
         });
       });
 
-      // 個別マーカークリック → 公園選択
       map.on("click", "unclustered-park", (e) => {
         const feature = e.features?.[0];
         if (!feature) return;
@@ -173,22 +181,53 @@ export function ParkMap() {
     map.flyTo({ center: [userLocation.lng, userLocation.lat], zoom: 13 });
   }, [userLocation]);
 
-  // フォーカスマーカー（星 + 人アイコン）
+  // 現在地マーカー（常時表示 — 許可が取れた瞬間から表示）
   useEffect(() => {
     const map = mapRef.current;
 
-    // 既存フォーカスマーカーを除去
+    if (!map || !userLocation) {
+      locationMarkerRef.current?.remove();
+      locationMarkerRef.current = null;
+      return;
+    }
+
+    if (locationMarkerRef.current) {
+      // 位置更新のみ（DOM 再生成不要）
+      locationMarkerRef.current.setLngLat([userLocation.lng, userLocation.lat]);
+      return;
+    }
+
+    const addMarker = () => {
+      locationMarkerRef.current = new maplibregl.Marker({
+        element: createLocationMarkerEl(),
+        anchor: "bottom",
+      })
+        .setLngLat([userLocation.lng, userLocation.lat])
+        .addTo(map);
+    };
+
+    // スタイルロード前でも後でも対応
+    if (map.isStyleLoaded()) {
+      addMarker();
+    } else {
+      map.once("load", addMarker);
+    }
+  }, [userLocation]);
+
+  // フォーカスマーカー（星のみ）
+  // userLocation を deps に含めないことでフォーカス後のマップ操作をブロックしない
+  useEffect(() => {
+    const map = mapRef.current;
+
     starMarkerRef.current?.remove();
     starMarkerRef.current = null;
-    personMarkerRef.current?.remove();
-    personMarkerRef.current = null;
 
     if (!map || !focusedParkId) return;
 
     const park = allParks.find((p) => p.id === focusedParkId);
     if (!park || park.lat === null || park.lng === null) return;
 
-    // 星マーカー（外側ラッパー: アイコン + ラベル縦並び、タップで公園詳細を再表示）
+    // 星マーカー
     const starEl = document.createElement("div");
     starEl.setAttribute("aria-label", park.name);
     starEl.style.cssText =
@@ -206,66 +245,34 @@ export function ParkMap() {
     starLabel.style.cssText =
       "background:#15803d;color:#ffffff;font-size:11px;font-weight:700;" +
       "padding:2px 7px;border-radius:4px;white-space:nowrap;max-width:180px;" +
-      "overflow:hidden;text-overflow:ellipsis;" +
-      "box-shadow:0 1px 5px rgba(0,0,0,0.35);";
+      "overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 5px rgba(0,0,0,0.35);";
 
-    // ラベルを上、バッジを下（anchor:"bottom" で座標 = バッジ下端 = ピンの先端）
     starEl.append(starLabel, starEmoji);
     starEl.addEventListener("click", () => selectPark(focusedParkId));
     starMarkerRef.current = new maplibregl.Marker({ element: starEl, anchor: "bottom" })
       .setLngLat([park.lng, park.lat])
       .addTo(map);
 
-    // 人アイコンマーカー（現在地が取れている場合のみ）
-    if (userLocation) {
-      // 外側ラッパー（アイコン + ラベル縦並び）
-      const personEl = document.createElement("div");
-      personEl.setAttribute("aria-label", "現在地");
-      personEl.style.cssText =
-        "display:flex;flex-direction:column;align-items:center;gap:4px;user-select:none;";
-
-      // 青い円形バッジ
-      const badge = document.createElement("div");
-      badge.textContent = "🧍";
-      badge.style.cssText =
-        "width:52px;height:52px;display:flex;align-items:center;justify-content:center;" +
-        "background:#1d4ed8;border:3px solid #ffffff;border-radius:50%;font-size:28px;" +
-        "box-shadow:0 0 0 5px rgba(29,78,216,0.30),0 3px 14px rgba(0,0,0,0.45);";
-
-      // "現在地" テキストラベル
-      const label = document.createElement("span");
-      label.textContent = "現在地";
-      label.style.cssText =
-        "background:#1d4ed8;color:#ffffff;font-size:11px;font-weight:700;" +
-        "padding:2px 7px;border-radius:4px;white-space:nowrap;" +
-        "box-shadow:0 1px 5px rgba(0,0,0,0.35);";
-
-      // ラベルを上、バッジを下（anchor:"bottom" で座標 = バッジ下端 = 足元）
-      personEl.append(label, badge);
-      personMarkerRef.current = new maplibregl.Marker({ element: personEl, anchor: "bottom" })
-        .setLngLat([userLocation.lng, userLocation.lat])
-        .addTo(map);
-
+    // fitBounds は focusedParkId 変化時に1度だけ実行
+    // userLocation を getState() で読むことで deps に含めず、マップ操作を妨げない
+    const { userLocation: currentLoc } = useAppStore.getState();
+    if (currentLoc) {
       const distM = haversineDistance(
         { lat: park.lat, lng: park.lng },
-        { lat: userLocation.lat, lng: userLocation.lng },
+        { lat: currentLoc.lat, lng: currentLoc.lng },
       );
-
       if (distM < 300) {
-        // 近すぎると fitBounds の bounds がほぼゼロになり world zoom になるため flyTo で固定
         map.flyTo({ center: [park.lng, park.lat], zoom: 16 });
       } else {
-        // extend() で SW/NE を正しく計算（引数順序依存のバグを回避）
         const bounds = new maplibregl.LngLatBounds();
         bounds.extend([park.lng, park.lat]);
-        bounds.extend([userLocation.lng, userLocation.lat]);
+        bounds.extend([currentLoc.lng, currentLoc.lat]);
         map.fitBounds(bounds, { padding: 80, maxZoom: 15 });
       }
     } else {
-      // 現在地不明: 公園だけにフライト
       map.flyTo({ center: [park.lng, park.lat], zoom: 16 });
     }
-  }, [focusedParkId, allParks, userLocation, selectPark]);
+  }, [focusedParkId, allParks, selectPark]); // userLocation を含めない
 
   return (
     <div

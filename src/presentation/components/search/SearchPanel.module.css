@@ -5,10 +5,35 @@
   gap: var(--space-4);
 }
 
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
+}
+
+.closeBtn {
+  width: var(--min-tap-size);
+  height: var(--min-tap-size);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-100);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  transition: background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.closeBtn:hover {
+  background: var(--color-primary-200);
 }
 
 /* 公園名検索エリア */

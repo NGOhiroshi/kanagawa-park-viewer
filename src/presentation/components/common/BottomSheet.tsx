@@ -11,31 +11,25 @@ interface Props {
   tall?: boolean;
 }
 
-/**
- * アクセシブルなボトムシート。
- * - isOpen=true で role="dialog" + aria-modal によりスクリーンリーダーが
- *   シート外のコンテンツを読み上げなくなる。
- * - 開閉時にフォーカスを適切に移動（フォーカストラップ）。
- * - Escape キーで閉じる。
- */
+const SWIPE_CLOSE_THRESHOLD = 80;
+
 export function BottomSheet({ isOpen, onClose, titleId, children, tall }: Props) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<Element | null>(null);
+  const touchStartY = useRef(0);
+  const isDragging = useRef(false);
 
-  // 開いたときに直前のフォーカスを記憶し、シートにフォーカスを移動
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement;
       sheetRef.current?.focus();
     } else {
-      // 閉じたとき元の要素にフォーカスを戻す
       if (previousFocusRef.current instanceof HTMLElement) {
         previousFocusRef.current.focus();
       }
     }
   }, [isOpen]);
 
-  // Escape キーで閉じる
   useEffect(() => {
     if (!isOpen || !onClose) return;
     const handler = (e: KeyboardEvent) => {
@@ -45,6 +39,29 @@ export function BottomSheet({ isOpen, onClose, titleId, children, tall }: Props)
     return () => document.removeEventListener("keydown", handler);
   }, [isOpen, onClose]);
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    isDragging.current = true;
+    if (sheetRef.current) sheetRef.current.style.transition = "none";
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging.current || !sheetRef.current) return;
+    const deltaY = e.touches[0].clientY - touchStartY.current;
+    if (deltaY > 0) sheetRef.current.style.transform = `translateY(${deltaY}px)`;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    if (sheetRef.current) {
+      sheetRef.current.style.transition = "";
+      sheetRef.current.style.transform = "";
+    }
+    if (deltaY >= SWIPE_CLOSE_THRESHOLD && onClose) onClose();
+  };
+
   return (
     <div
       ref={sheetRef}
@@ -53,11 +70,18 @@ export function BottomSheet({ isOpen, onClose, titleId, children, tall }: Props)
       aria-labelledby={titleId}
       tabIndex={-1}
       className={`${styles.sheet} ${isOpen ? styles.open : ""} ${tall ? styles.tall : ""}`}
-      // マウスユーザーにはフォーカスリングを見せない
       style={{ outline: "none" }}
     >
-      {/* ドラッグハンドル (視覚的ヒント) */}
-      <div className={styles.handle} aria-hidden="true" />
+      {/* ドラッグハンドル — タッチ操作でシートを閉じる */}
+      <div
+        className={styles.handleArea}
+        aria-hidden="true"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className={styles.handle} />
+      </div>
       {children}
     </div>
   );

@@ -36,16 +36,26 @@ const grouped = CATEGORY_ORDER.map((cat) => ({
  * - カテゴリごとに <section> + <h3> でアウトライン構造化
  */
 export function SearchPanel() {
-  const { filteredParks, condition, nameQuery, clearCondition, setNameQuery, openList } = useAppStore();
+  const { filteredParks, condition, nameQuery, clearCondition, setNameQuery, openList, closeSearchPanel } = useAppStore();
   const selectedCount = condition.facilities.size;
   const nameInputId = useId();
   const hasAnyFilter = selectedCount > 0 || nameQuery.trim() !== "";
 
   return (
     <section aria-label="公園フィルタ" className={styles.panel}>
-      <h2 id="search-panel-title" className={styles.title}>
-        公園を探す
-      </h2>
+      <div className={styles.panelHeader}>
+        <h2 id="search-panel-title" className={styles.title}>
+          公園を探す
+        </h2>
+        <button
+          type="button"
+          className={styles.closeBtn}
+          onClick={closeSearchPanel}
+          aria-label="検索パネルを閉じる"
+        >
+          ✕
+        </button>
+      </div>
 
       {/* 公園名検索 */}
       <div role="search" className={styles.nameSearch}>

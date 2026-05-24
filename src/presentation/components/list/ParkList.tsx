@@ -15,8 +15,6 @@ export function ParkList() {
   const origin = userLocation ?? KANAGAWA_PREFECTURAL_OFFICE;
   const sorted = sortByDistance(filteredParks, origin);
   const displayed = sorted.slice(0, DISPLAY_LIMIT);
-  const isLocationUnavailable =
-    geolocationStatus === "denied" || geolocationStatus === "unavailable";
 
   return (
     <section aria-labelledby="park-list-title" className={styles.panel}>
@@ -24,9 +22,11 @@ export function ParkList() {
         <h2 id="park-list-title" className={styles.title}>
           {filteredParks.length}件の公園
         </h2>
-        {isLocationUnavailable && (
+        {!userLocation && (
           <p className={styles.locationHint} role="note">
-            📍 現在地取得を許可すると近い順で表示されます
+            {geolocationStatus === "denied" || geolocationStatus === "unavailable"
+              ? "📍 神奈川県庁からの距離で表示しています"
+              : "📍 現在地を許可すると近い順で表示されます"}
           </p>
         )}
       </div>
