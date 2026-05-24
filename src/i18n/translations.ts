@@ -91,6 +91,11 @@ export interface AppTranslations {
     overviewHeading: string;
     overviewText: string;
     features: string[];
+    pwaHeading: string;
+    pwaIosTitle: string;
+    pwaIosSteps: string[];
+    pwaAndroidTitle: string;
+    pwaAndroidSteps: string[];
     dataHeading: string;
     parkDataTitle: string;
     parkDataText: string;
@@ -112,6 +117,7 @@ export interface AppTranslations {
     dataProcessingValue: string;
     feedbackHeading: string;
     feedbackText: string;
+    issuesLabel: string;
     copyright: string;
     disclaimer: string;
   };
@@ -265,6 +271,21 @@ const ja: AppTranslations = {
       "地図上でのクラスター表示",
       "ログイン不要・インストール不要（PWA）",
     ],
+    pwaHeading: "アプリとして使う（PWA）",
+    pwaIosTitle: "iPhone / iPad（Safari）",
+    pwaIosSteps: [
+      "Safariでこのページを開く",
+      "画面下の共有ボタン（□↑）をタップ",
+      "「ホーム画面に追加」をタップ",
+      "「追加」をタップして完了",
+    ],
+    pwaAndroidTitle: "Android（Chrome）",
+    pwaAndroidSteps: [
+      "Chromeでこのページを開く",
+      "右上のメニュー（⋮）をタップ",
+      "「アプリをインストール」または「ホーム画面に追加」をタップ",
+      "画面の指示に従って完了",
+    ],
     dataHeading: "データについて",
     parkDataTitle: "公園データ",
     parkDataText: "神奈川県が公開する「都市公園台帳（整備記録）」オープンデータを使用しています。",
@@ -287,7 +308,8 @@ const ja: AppTranslations = {
     dataProcessing: "データ処理",
     dataProcessingValue: "クライアント側全件フィルタ（DB・APIサーバー不要）",
     feedbackHeading: "フィードバック",
-    feedbackText: "データの誤りや機能のご要望は、GitHubのIssueからお知らせください。",
+    feedbackText: "データの誤りや機能のご要望はお気軽にどうぞ。",
+    issuesLabel: "GitHub Issues でフィードバックする ↗",
     copyright: "© 2026 神奈川公園ビューワー",
     disclaimer: "本サービスは神奈川県・国土地理院とは無関係の個人プロジェクトです。掲載情報の正確性を保証するものではなく、利用によって生じた損害について開発者は一切の責任を負いません。",
   },
@@ -441,6 +463,21 @@ const en: AppTranslations = {
       "Cluster display on map",
       "No login or installation required (PWA)",
     ],
+    pwaHeading: "Use as an App (PWA)",
+    pwaIosTitle: "iPhone / iPad (Safari)",
+    pwaIosSteps: [
+      "Open this page in Safari",
+      "Tap the Share button (□↑) at the bottom of the screen",
+      "Tap \"Add to Home Screen\"",
+      "Tap \"Add\" to finish",
+    ],
+    pwaAndroidTitle: "Android (Chrome)",
+    pwaAndroidSteps: [
+      "Open this page in Chrome",
+      "Tap the menu (⋮) in the top right",
+      "Tap \"Install app\" or \"Add to Home Screen\"",
+      "Follow the on-screen instructions",
+    ],
     dataHeading: "Data",
     parkDataTitle: "Park Data",
     parkDataText:
@@ -465,7 +502,8 @@ const en: AppTranslations = {
     dataProcessing: "Data Processing",
     dataProcessingValue: "Client-side full filtering (no DB or API server needed)",
     feedbackHeading: "Feedback",
-    feedbackText: "Please report data errors or feature requests via GitHub Issues.",
+    feedbackText: "Data errors or feature requests are always welcome.",
+    issuesLabel: "Submit feedback via GitHub Issues ↗",
     copyright: "© 2026 Kanagawa Park Viewer",
     disclaimer:
       "This service is an independent project unaffiliated with Kanagawa Prefecture or the Geospatial Information Authority of Japan. The developer makes no guarantees regarding the accuracy of the information and accepts no liability for any damages arising from its use.",

@@ -33,6 +33,24 @@ export function AboutPage() {
         {/* 免責事項バナー */}
         <p className={styles.disclaimer}>{a.note} {a.noteText}</p>
 
+        <section className={styles.section} aria-labelledby="about-pwa">
+          <h2 id="about-pwa" className={styles.sectionTitle}>{a.pwaHeading}</h2>
+          <div className={styles.pwaGrid}>
+            <div className={styles.pwaCard}>
+              <h3 className={styles.attrTitle}>{a.pwaIosTitle}</h3>
+              <ol className={styles.stepList}>
+                {a.pwaIosSteps.map((step, i) => <li key={i}>{step}</li>)}
+              </ol>
+            </div>
+            <div className={styles.pwaCard}>
+              <h3 className={styles.attrTitle}>{a.pwaAndroidTitle}</h3>
+              <ol className={styles.stepList}>
+                {a.pwaAndroidSteps.map((step, i) => <li key={i}>{step}</li>)}
+              </ol>
+            </div>
+          </div>
+        </section>
+
         <section className={styles.section} aria-labelledby="about-data">
           <h2 id="about-data" className={styles.sectionTitle}>{a.dataHeading}</h2>
 
@@ -119,6 +137,14 @@ export function AboutPage() {
         <section className={styles.section} aria-labelledby="about-contact">
           <h2 id="about-contact" className={styles.sectionTitle}>{a.feedbackHeading}</h2>
           <p>{a.feedbackText}</p>
+          <a
+            href="https://github.com/NGOhiroshi/kanagawa-park-viewer/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.issuesLink}
+          >
+            {a.issuesLabel}
+          </a>
         </section>
 
         <footer className={styles.footer}>
