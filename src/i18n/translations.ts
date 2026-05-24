@@ -43,6 +43,7 @@ export interface AppTranslations {
     allowLocation: string;
     truncated: (shown: number, total: number) => string;
     activeFacilities: string;
+    closeAria: string;
   };
 
   card: {
@@ -74,6 +75,10 @@ export interface AppTranslations {
     language: string;
     japanese: string;
     english: string;
+    theme: string;
+    themeLight: string;
+    themeDark: string;
+    themeSystem: string;
   };
 
   categories: Record<FacilityCategory, string>;
@@ -153,6 +158,7 @@ const ja: AppTranslations = {
     allowLocation: "📍 現在地を許可すると近い順で表示されます",
     truncated: (shown, total) => `※ 上位 ${shown} 件を表示しています（全 ${total} 件）`,
     activeFacilities: "絞り込み中の設備",
+    closeAria: "公園リストを閉じる",
   },
 
   card: {
@@ -184,6 +190,10 @@ const ja: AppTranslations = {
     language: "言語",
     japanese: "日本語",
     english: "English",
+    theme: "テーマ",
+    themeLight: "ライト",
+    themeDark: "ダーク",
+    themeSystem: "システム",
   },
 
   categories: {
@@ -324,6 +334,7 @@ const en: AppTranslations = {
     allowLocation: "📍 Allow location access to sort by nearest",
     truncated: (shown, total) => `Showing top ${shown} of ${total} parks`,
     activeFacilities: "Active filters",
+    closeAria: "Close park list",
   },
 
   card: {
@@ -355,6 +366,10 @@ const en: AppTranslations = {
     language: "Language",
     japanese: "日本語",
     english: "English",
+    theme: "Theme",
+    themeLight: "Light",
+    themeDark: "Dark",
+    themeSystem: "System",
   },
 
   categories: {

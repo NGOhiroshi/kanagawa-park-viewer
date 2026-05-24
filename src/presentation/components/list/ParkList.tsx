@@ -10,7 +10,7 @@ import styles from "./ParkList.module.css";
 const DISPLAY_LIMIT = 300;
 
 export function ParkList() {
-  const { filteredParks, userLocation, geolocationStatus, selectParkFromList } =
+  const { filteredParks, userLocation, geolocationStatus, selectParkFromList, closeList } =
     useAppStore();
   const { t } = useLocale();
 
@@ -21,9 +21,19 @@ export function ParkList() {
   return (
     <section aria-labelledby="park-list-title" className={styles.panel}>
       <div className={styles.header}>
-        <h2 id="park-list-title" className={styles.title}>
-          {t.list.title(filteredParks.length)}
-        </h2>
+        <div className={styles.titleRow}>
+          <h2 id="park-list-title" className={styles.title}>
+            {t.list.title(filteredParks.length)}
+          </h2>
+          <button
+            type="button"
+            onClick={closeList}
+            className={styles.closeBtn}
+            aria-label={t.list.closeAria}
+          >
+            ✕
+          </button>
+        </div>
         {!userLocation && (
           <p className={styles.locationHint} role="note">
             {geolocationStatus === "denied" || geolocationStatus === "unavailable"

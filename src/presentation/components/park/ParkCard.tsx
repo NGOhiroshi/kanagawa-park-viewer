@@ -40,7 +40,7 @@ export function ParkCard() {
         )}
         <button
           type="button"
-          onClick={() => selectPark(null)}
+          onClick={() => { selectPark(null); closeList(); }}
           className={styles.closeBtn}
           aria-label={t.card.close(park.name)}
         >
