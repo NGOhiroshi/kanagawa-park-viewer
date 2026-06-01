@@ -7,11 +7,17 @@ const THEMES: Theme[] = ["light", "system", "dark"];
 const THEME_ICONS: Record<Theme, string> = { light: "☀️", system: "🌐", dark: "🌙" };
 
 interface Props {
-  onClose: () => void;
+  readonly onClose: () => void;
 }
 
 export function SettingsPanel({ onClose }: Props) {
   const { t, locale, setLocale, theme, setTheme } = useLocale();
+
+  const themeLabel: Record<Theme, string> = {
+    light: t.settings.themeLight,
+    dark: t.settings.themeDark,
+    system: t.settings.themeSystem,
+  };
 
   return (
     <section aria-label={t.settings.title} className={styles.panel}>
@@ -30,9 +36,9 @@ export function SettingsPanel({ onClose }: Props) {
       </div>
 
       {/* 言語 */}
-      <div className={styles.row}>
-        <span className={styles.label}>{t.settings.language}</span>
-        <div role="group" aria-label={t.settings.language} className={styles.toggle}>
+      <fieldset className={styles.row}>
+        <legend className={styles.label}>{t.settings.language}</legend>
+        <div className={styles.toggle}>
           {LOCALES.map((loc) => (
             <button
               key={loc}
@@ -45,32 +51,26 @@ export function SettingsPanel({ onClose }: Props) {
             </button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {/* テーマ */}
-      <div className={`${styles.row} ${styles.rowStacked}`}>
-        <span className={styles.label}>{t.settings.theme}</span>
-        <div role="group" aria-label={t.settings.theme} className={styles.toggle}>
-          {THEMES.map((th) => {
-            const label =
-              th === "light" ? t.settings.themeLight :
-              th === "dark"  ? t.settings.themeDark  :
-                               t.settings.themeSystem;
-            return (
-              <button
-                key={th}
-                type="button"
-                aria-pressed={theme === th}
-                onClick={() => setTheme(th)}
-                className={`${styles.toggleBtn} ${theme === th ? styles.active : ""}`}
-                aria-label={label}
-              >
-                {THEME_ICONS[th]} {label}
-              </button>
-            );
-          })}
+      <fieldset className={`${styles.row} ${styles.rowStacked}`}>
+        <legend className={styles.label}>{t.settings.theme}</legend>
+        <div className={styles.toggle}>
+          {THEMES.map((th) => (
+            <button
+              key={th}
+              type="button"
+              aria-pressed={theme === th}
+              onClick={() => setTheme(th)}
+              className={`${styles.toggleBtn} ${theme === th ? styles.active : ""}`}
+              aria-label={themeLabel[th]}
+            >
+              {THEME_ICONS[th]} {themeLabel[th]}
+            </button>
+          ))}
         </div>
-      </div>
+      </fieldset>
     </section>
   );
 }

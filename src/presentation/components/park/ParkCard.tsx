@@ -121,10 +121,10 @@ export function ParkCard() {
         <h3 className={styles.sectionTitle}>{t.card.facilities}</h3>
         <div className={styles.facilityGrid}>
           {presentFacilities.map((f) => (
-            <FacilityBadge key={f.key} facilityKey={f.key} label={t.facilityNames[f.key]} present={true} />
+            <FacilityBadge key={f.key} label={t.facilityNames[f.key]} present={true} />
           ))}
           {absentFacilities.map((f) => (
-            <FacilityBadge key={f.key} facilityKey={f.key} label={t.facilityNames[f.key]} present={false} />
+            <FacilityBadge key={f.key} label={t.facilityNames[f.key]} present={false} />
           ))}
         </div>
       </section>

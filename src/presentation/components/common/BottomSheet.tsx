@@ -2,13 +2,13 @@ import { useEffect, useRef } from "react";
 import styles from "./BottomSheet.module.css";
 
 interface Props {
-  isOpen: boolean;
-  onClose?: () => void;
+  readonly isOpen: boolean;
+  readonly onClose?: () => void;
   /** アクセシビリティ: ダイアログのタイトル (aria-labelledby 用) */
-  titleId: string;
-  children: React.ReactNode;
+  readonly titleId: string;
+  readonly children: React.ReactNode;
   /** 高さを 90dvh に広げる（リスト表示用） */
-  tall?: boolean;
+  readonly tall?: boolean;
 }
 
 const SWIPE_CLOSE_THRESHOLD = 80;
@@ -23,10 +23,8 @@ export function BottomSheet({ isOpen, onClose, titleId, children, tall }: Props)
     if (isOpen) {
       previousFocusRef.current = document.activeElement;
       sheetRef.current?.focus();
-    } else {
-      if (previousFocusRef.current instanceof HTMLElement) {
-        previousFocusRef.current.focus();
-      }
+    } else if (previousFocusRef.current instanceof HTMLElement) {
+      previousFocusRef.current.focus();
     }
   }, [isOpen]);
 

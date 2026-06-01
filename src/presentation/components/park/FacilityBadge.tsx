@@ -1,10 +1,8 @@
-import type { FacilityKey } from "../../../domain/park/Park";
 import styles from "./FacilityBadge.module.css";
 
 interface Props {
-  facilityKey: FacilityKey;
-  label: string;
-  present: boolean;
+  readonly label: string;
+  readonly present: boolean;
 }
 
 /**

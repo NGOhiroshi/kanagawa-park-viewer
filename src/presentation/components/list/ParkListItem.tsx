@@ -7,9 +7,9 @@ import { useLocale } from "../../../i18n/useLocale";
 import styles from "./ParkListItem.module.css";
 
 interface Props {
-  park: Park;
-  origin: Coordinates;
-  onClick: () => void;
+  readonly park: Park;
+  readonly origin: Coordinates;
+  readonly onClick: () => void;
 }
 
 export function ParkListItem({ park, origin, onClick }: Props) {

@@ -23,8 +23,8 @@ const FACILITY_EMOJI: Partial<Record<FacilityKey, string>> = {
 };
 
 interface Props {
-  facilityKey: FacilityKey;
-  label: string;
+  readonly facilityKey: FacilityKey;
+  readonly label: string;
 }
 
 /**

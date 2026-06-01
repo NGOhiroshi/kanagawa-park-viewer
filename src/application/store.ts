@@ -118,13 +118,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   selectPark: (id) => {
-    if (id !== null) {
-      // マップ上のピンをタップ: リストも閉じる、フォーカスも解除
-      set({ selectedParkId: id, isSearchPanelOpen: false, isListOpen: false, focusedParkId: null });
-    } else {
+    if (id === null) {
       // カードを閉じる: isListOpen・focusedParkId は変更しない
       // (リストへ戻る / フォーカス継続のため)
       set({ selectedParkId: null });
+    } else {
+      // マップ上のピンをタップ: リストも閉じる、フォーカスも解除
+      set({ selectedParkId: id, isSearchPanelOpen: false, isListOpen: false, focusedParkId: null });
     }
   },
 

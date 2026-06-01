@@ -8,10 +8,10 @@ export function AndOrToggle() {
   const { t } = useLocale();
 
   return (
-    <div role="group" aria-label={t.search.andOrGroupLabel} className={styles.group}>
+    <fieldset aria-label={t.search.andOrGroupLabel} className={styles.group}>
       <ModeButton label="AND" current={condition.mode} onClick={setMode} meaning={t.search.andMeaning} />
       <ModeButton label="OR"  current={condition.mode} onClick={setMode} meaning={t.search.orMeaning} />
-    </div>
+    </fieldset>
   );
 }
 
@@ -21,10 +21,10 @@ function ModeButton({
   onClick,
   meaning,
 }: {
-  label: SearchMode;
-  current: SearchMode;
-  onClick: (mode: SearchMode) => void;
-  meaning: string;
+  readonly label: SearchMode;
+  readonly current: SearchMode;
+  readonly onClick: (mode: SearchMode) => void;
+  readonly meaning: string;
 }) {
   const isActive = label === current;
   return (
