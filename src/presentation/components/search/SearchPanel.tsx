@@ -96,13 +96,13 @@ export function SearchPanel() {
         {grouped.map(({ category, label, facilities }) => (
           <section key={category} aria-label={label}>
             <h4 className={styles.categoryLabel}>{label}</h4>
-            <div className={styles.chips} role="list">
+            <ul className={styles.chips}>
               {facilities.map((f) => (
-                <div key={f.key} role="listitem">
+                <li key={f.key}>
                   <FacilityChip facilityKey={f.key} label={t.facilityNames[f.key]} />
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           </section>
         ))}
       </div>

@@ -24,13 +24,14 @@ function detectTheme(): Theme {
 }
 
 function applyTheme(theme: Theme): void {
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const resolved = theme === "system" ? (prefersDark ? "dark" : "light") : theme;
-  document.documentElement.setAttribute("data-theme", resolved);
+  const prefersDark = globalThis.matchMedia("(prefers-color-scheme: dark)").matches;
+  const resolvedBySystem = prefersDark ? "dark" : "light";
+  const resolved = theme === "system" ? resolvedBySystem : theme;
+  document.documentElement.dataset.theme = resolved;
 }
 
 // OS のカラースキーム変更を監視（system 選択時に追従）
-const mql = window.matchMedia("(prefers-color-scheme: dark)");
+const mql = globalThis.matchMedia("(prefers-color-scheme: dark)");
 mql.addEventListener("change", () => {
   const { theme } = useLocale.getState();
   if (theme === "system") applyTheme("system");

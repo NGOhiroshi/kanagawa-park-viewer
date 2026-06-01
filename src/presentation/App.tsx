@@ -88,8 +88,7 @@ export function App() {
           aria-controls="search-panel"
           aria-label={t.topBar.findParksAria}
         >
-          🔍
-          <span className={styles.searchLabel}>{t.topBar.findParks}</span>
+          {"🔍"}<span className={styles.searchLabel}>{t.topBar.findParks}</span>
           <span
             className={`${styles.countBadge} ${activeFilterCount > 0 ? styles.countBadgeActive : ""}`}
             aria-label={t.topBar.parksCount(filteredParks.length)}
@@ -113,13 +112,11 @@ export function App() {
               },
             );
           }}
-          aria-label={
-            geolocationStatus === "granted" && userLocation
-              ? t.topBar.locationGranted
-              : geolocationStatus === "denied"
-              ? t.topBar.locationDenied
-              : t.topBar.locationGet
-          }
+          aria-label={(() => {
+            if (geolocationStatus === "granted" && userLocation) return t.topBar.locationGranted;
+            if (geolocationStatus === "denied") return t.topBar.locationDenied;
+            return t.topBar.locationGet;
+          })()}
           aria-pressed={geolocationStatus === "granted"}
         >
           📍

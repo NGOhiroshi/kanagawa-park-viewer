@@ -138,15 +138,14 @@ export function ParkMap() {
         },
       });
 
-      map.on("click", "clusters", (e) => {
+      map.on("click", "clusters", async (e) => {
         const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
         const clusterId = features[0]?.properties?.cluster_id as number | undefined;
         if (clusterId == null) return;
         const source = map.getSource("parks") as maplibregl.GeoJSONSource;
         const center = (features[0].geometry as GeoJSON.Point).coordinates as [number, number];
-        source.getClusterExpansionZoom(clusterId).then((zoom) => {
-          map.easeTo({ center, zoom });
-        });
+        const zoom = await source.getClusterExpansionZoom(clusterId);
+        map.easeTo({ center, zoom });
       });
 
       map.on("click", "unclustered-park", (e) => {
@@ -169,7 +168,7 @@ export function ParkMap() {
   // filteredParks が変わったらソースを更新
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map?.isStyleLoaded()) return;
     const source = map.getSource("parks") as maplibregl.GeoJSONSource | undefined;
     if (!source) return;
     source.setData(makeParkGeoJSON(filteredParks));
@@ -230,7 +229,7 @@ export function ParkMap() {
     if (!map || !focusedParkId) return;
 
     const park = allParks.find((p) => p.id === focusedParkId);
-    if (!park || park.lat === null || park.lng === null) return;
+    if (park?.lat == null || park?.lng == null) return;
 
     // 星マーカー
     const starEl = document.createElement("div");

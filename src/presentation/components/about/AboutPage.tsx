@@ -8,7 +8,7 @@ export function AboutPage() {
   const a = t.about;
 
   return (
-    <div className={styles.page} role="main">
+    <main className={styles.page}>
       <header className={styles.header}>
         <button
           type="button"
@@ -39,13 +39,13 @@ export function AboutPage() {
             <div className={styles.pwaCard}>
               <h3 className={styles.attrTitle}>{a.pwaIosTitle}</h3>
               <ol className={styles.stepList}>
-                {a.pwaIosSteps.map((step, i) => <li key={i}>{step}</li>)}
+                {a.pwaIosSteps.map((step) => <li key={step}>{step}</li>)}
               </ol>
             </div>
             <div className={styles.pwaCard}>
               <h3 className={styles.attrTitle}>{a.pwaAndroidTitle}</h3>
               <ol className={styles.stepList}>
-                {a.pwaAndroidSteps.map((step, i) => <li key={i}>{step}</li>)}
+                {a.pwaAndroidSteps.map((step) => <li key={step}>{step}</li>)}
               </ol>
             </div>
           </div>
@@ -152,6 +152,6 @@ export function AboutPage() {
           <p className={styles.footerSub}>{a.disclaimer}</p>
         </footer>
       </div>
-    </div>
+    </main>
   );
 }
